@@ -83,15 +83,14 @@
 
   $connection = oci_connect($username, $password, $ezstring); // connect to database
   $masterArray = array(); //an array of all the master ticket numbers
-  /*$invalidReasons = []; // an associative array connecting the 
-              // ticket numbers with their invalid reasons
-  $ticketData = []; // associative array connecting ticket #s with their data
-  $masterData = []; // associative array connecting master ticket #s with data */
+
   if (isset($_GET['sortBy'])) {
     $sortType = $_GET['sortBy'];
     if ($sortType == "newTickets") {
       $changesString = implode(",", $changesArray);
       $stid = oci_parse($connection, "SELECT * FROM recharge_pro.invalid_charges WHERE PROJECT_NUM=3 AND JOB_NUM IN (" . $changesString . ")");
+    } else {
+      $stid = oci_parse($connection, "SELECT * FROM recharge_pro.invalid_charges WHERE PROJECT_NUM=3");
     }
   } else {
     $stid = oci_parse($connection, "SELECT * FROM recharge_pro.invalid_charges WHERE PROJECT_NUM=3");
