@@ -1,0 +1,19 @@
+input[data-column="pid"] {
+	width: 50px;
+}
+
+input[data-column="closeDate"] {
+	width: 80px;
+}
+
+input[data-column="index"] {
+	width: 90px;
+}
+
+input[data-column='billable'] {
+	width: 60px;
+}
+
+.fa-star {
+	color: #337ab7;
+}

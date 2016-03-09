@@ -26,7 +26,7 @@
 		console.log(JSON.stringify(json));
 	});
 
-	$("#applyChanges").click(function() {
+	$(".applyChanges").click(function() {
 		console.log(JSON.stringify(json));
 		$.ajax({
 			method: "POST",

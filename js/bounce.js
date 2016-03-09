@@ -1,4 +1,6 @@
-window.onload = function() { $(".children").hide(); };
+$(document).ready(function() {
+	$(".children").hide();
+});
 	
 /* Function name: showChildren
  * Parameters: number - the master ticket number
@@ -7,12 +9,24 @@ window.onload = function() { $(".children").hide(); };
 function showChildren(number) {
 	$("#p" + number).toggle();
 	if($("#p" + number).is(':visible')) {
-		this.innerHtml = "Collapse";
+		$("#expand" + number).text("-");
 	} else {
-		this.innerHtml = "Expand";
+		$("#expand" + number).text("+");
 	}
 }
 
 function expandAll() {
-	$(".expand").click();
+	if ($("#toggleButton").text() == "Expand All") {
+		$(".children").show();
+		$("#toggleButton").text("Collapse All");
+		$(".expand").text('-');
+	} else {
+		$(".children").hide();
+		$("#toggleButton").text("Expand All");
+		$(".expand").text('+');
+	}
+}
+
+function scrollTop() {
+	$('body').scrollTop(0);
 }
