@@ -31,13 +31,14 @@
 		$.ajax({
 			method: "POST",
 			data: json,
-			url: "editSoap.php",
+			url: "../editSoap.php",
 			error: function (xhr, ajaxOptions, thrownError) {
 				alert(xhr.status);
 				alert(thrownError);
 			}
-		}).done(function(data) {
-			console.log(data);
+		}).success(function(data) {
+			alert(data);
+			
 		});
 	});
 
@@ -94,6 +95,9 @@
 				break;
 			case "billable":
 				returnString = "Billable";
+				break;
+			case "status":
+				returnString = "status";
 				break;
 		}
 		return returnString;

@@ -54,7 +54,7 @@
                         <button id="upload1">Upload</button>
                         <br>
                         <span id="loadingMessage1"><i class="fa fa-circle-o-notch fa-spin"></i>Generating differences... this could take a while.</span>
-                        <span id="doneMessage1">Differences generated! <a href="bounce-reports.php">Go back to Bounce Reports</a></span>
+                        <span id="doneMessage1"></span> 
                         <hr>
                         <h3>Compare With Latest</h3>
                         <em>This will mark differences between the file uploaded and the last file uploaded.</em>
@@ -64,7 +64,7 @@
                         <button id="upload2">Upload</button>
                         <br>
                         <span id="loadingMessage2"><i class="fa fa-circle-o-notch fa-spin"></i>Generating differences... this could take a while.</span>
-                        <span id="doneMessage2">Differences generated! <a href="bounce-reports.php">Go back to Bounce Reports</a></span>
+                        <span id="doneMessage2"></span>
                     </div>
                     <!-- /.col-lg-12 -->
                 </div>
@@ -97,7 +97,7 @@
             form_data.append('version', 1);
             form_data.append('oldFileToUpload', file_data1);
             form_data.append('newFileToUpload', file_data2);
-            $("#doneMessage1").hide();
+            //$("#doneMessage1").hide();
             $("#loadingMessage1").show();
             $.ajax({
                 type: 'post',
@@ -112,7 +112,8 @@
                     }
                     console.log(data);
                     $("#loadingMessage1").hide();
-                    $("#doneMessage1").show();
+                    $("#doneMessage1").html(data);
+                    //$("#doneMessage1").show();
                 }
             });
         });
@@ -134,8 +135,10 @@
                 complete: function(err, data) {
                     if (err) {
                         console.log(err.responseText);
+                        $("#doneMessage2").html(err.responseText);
+                    } else {
+                        $("#doneMessage2").html(data);
                     }
-                    console.log(data);
                     $("#loadingMessage2").hide();
                     $("#doneMessage2").show();
                 }

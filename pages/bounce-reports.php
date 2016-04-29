@@ -62,19 +62,54 @@
                       <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu pull-right" role="menu">
-                      <li><a href="./bounce-reports.php">Default</a>
+                      <li><a href="./bounce-reports.php?sortBy[]=decCosts">Decreasing Costs</a></li>
+                      <li><a href="./bounce-reports.php?sortBy[]=incCosts">Increasing Costs</a></li>
+                      <li><a href="./bounce-reports.php?sortBy[]=newTickets">New Tickets</a></li>
+                      <li><a href="#" data-toggle="modal" data-target="#advancedSort">Advanced...</a>
                       </li>
-                      <li><a href="./bounce-reports.php?sortBy=decCosts">Highest-Lowest Costs</a>
-                      </li>
-                      <li><a href="./bounce-reports.php?sortBy=incCosts">Lowest-Highest Costs</a>
-                      </li>
-                      <li><a href="./bounce-reports.php?sortBy=newTickets">New Tickets</a></li>
                     </ul>
                   </div>
                 </div>
               </div>
               <!-- /.panel-heading -->
-              <div class="panel-body">
+
+              <div class="modal fade" id="advancedSort" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Advanced Sorting Options</h4>
+                  </div>
+                  <div class="modal-body">
+                    <div class="row">
+                      <div class="col-md-4"><strong>Sort by cost:</strong></div>
+                      <div class="col-md-4"><input type="radio" name="sortCost" value="decCosts"> Decreasing Costs</div>
+                      <div class="col-md-4"><input type="radio" name="sortCost" value="incCosts"> Increasing Costs<br></div>
+                    </div><br>
+                    <div class="row">
+                      <div class="col-md-4"><strong>Sort by reason:</strong></div>
+                      <div class="col-md-4"><input type="checkbox" name="sortReason" value="buyer"> Invalid SDSC Buyer</div>
+                      <div class="col-md-4"><input type="checkbox" name="sortReason" value="closeDate"> Invalid Close Date</div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-4">&nbsp;</div>
+                      <div class="col-md-4"><input type="checkbox" name="sortReason" value="index"> Invalid Index</div>
+                      <div class="col-md-4"><input type="checkbox" name="sortReason" value="indexPercent"> Invalid Index %</div>
+                    </div><br>
+                    <div class="row">
+                      <div class="col-md-4"><strong>Show only new tickets?</strong></div>
+                      <div class="col-md-4"><input type="radio" name="onlyNew" value="newTickets"> Yes</div>
+                      <div class="col-md-4"><input type="radio" name="onlyNew" value="all"> No</div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="getSortedOptions()">Save changes</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="panel-body">
 <?php
   require ('../config.php');
   $changesArray = file(__DIR__ . "/uploads/changes.txt");
@@ -85,15 +120,91 @@
   $masterArray = array(); //an array of all the master ticket numbers
 
   if (isset($_GET['sortBy'])) {
-    $sortType = $_GET['sortBy'];
-    if ($sortType == "newTickets") {
+    $sortOptions = $_GET['sortBy'];
+    if (in_array("newTickets", $sortOptions, true)) {
       $changesString = implode(",", $changesArray);
-      $stid = oci_parse($connection, "SELECT * FROM recharge_pro.invalid_charges WHERE PROJECT_NUM=3 AND JOB_NUM IN (" . $changesString . ")");
+
+      if (isset($_GET['reasons'])) {
+        $reasonSort = $_GET['reasons'];
+        $reasonArray = array();
+        foreach ($reasonSort as $reason) {
+          switch ($reason) {
+            case "buyer":
+                array_push($reasonArray, "'Invalid SDSC buyer'");
+              break;
+            case "closeDate":
+              array_push($reasonArray, "'Invalid close date'");
+              break;
+            case "index":
+              array_push($reasonArray, "'Invalid index'");
+              break;
+            case "indexPercent":
+              array_push($reasonArray, "'Invalid index percentage'");
+              break;
+            default: "";
+          }
+        }
+        $reasonList = implode(",", $reasonArray);
+        var_dump($reasonList);
+        $stid = oci_parse($connection, "SELECT * FROM recharge_pro.invalid_charges WHERE PROJECT_NUM=3 AND JOB_NUM IN (" . $changesString . ") AND INVALID_REASON IN (" . $reasonList . ")");
+      } else {
+        $stid = oci_parse($connection, "SELECT * FROM recharge_pro.invalid_charges WHERE PROJECT_NUM=3 AND JOB_NUM IN (" . $changesString . ")");
+      }
+    } else {
+      if (isset($_GET['reasons'])) {
+      $reasonSort = $_GET['reasons'];
+        $reasonArray = array();
+        foreach ($reasonSort as $reason) {
+          switch ($reason) {
+            case "buyer":
+                array_push($reasonArray, "'Invalid SDSC buyer'");
+              break;
+            case "closeDate":
+              array_push($reasonArray, "'Invalid close date'");
+              break;
+            case "index":
+              array_push($reasonArray, "'Invalid index'");
+              break;
+            case "indexPercent":
+              array_push($reasonArray, "'Invalid index percentage'");
+              break;
+            default: "";
+          }
+        }
+        $reasonList = implode(",", $reasonArray);
+        var_dump($reasonList);
+        $stid = oci_parse($connection, "SELECT * FROM recharge_pro.invalid_charges WHERE PROJECT_NUM=3 AND INVALID_REASON IN (" . $reasonList . ")");
+      } else {
+        $stid = oci_parse($connection, "SELECT * FROM recharge_pro.invalid_charges WHERE PROJECT_NUM=3");
+      }
+    }
+  } else {
+    if (isset($_GET['reasons'])) {
+      $reasonSort = $_GET['reasons'];
+        $reasonArray = array();
+        foreach ($reasonSort as $reason) {
+          switch ($reason) {
+            case "buyer":
+                array_push($reasonArray, "'Invalid SDSC buyer'");
+              break;
+            case "closeDate":
+              array_push($reasonArray, "'Invalid close date'");
+              break;
+            case "index":
+              array_push($reasonArray, "'Invalid index'");
+              break;
+            case "indexPercent":
+              array_push($reasonArray, "'Invalid index percentage'");
+              break;
+            default: "";
+          }
+        }
+        $reasonList = implode(",", $reasonArray);
+        var_dump($reasonList);
+        $stid = oci_parse($connection, "SELECT * FROM recharge_pro.invalid_charges WHERE PROJECT_NUM=3 AND INVALID_REASON IN (" . $reasonList . ")");
     } else {
       $stid = oci_parse($connection, "SELECT * FROM recharge_pro.invalid_charges WHERE PROJECT_NUM=3");
     }
-  } else {
-    $stid = oci_parse($connection, "SELECT * FROM recharge_pro.invalid_charges WHERE PROJECT_NUM=3");
   }
   oci_execute($stid);
 
@@ -199,9 +310,9 @@
   calculateTotalCosts();
   if (isset($_GET['sortBy'])) {
     $sortType = $_GET['sortBy'];
-    if ($sortType == "decCosts") {
+    if (in_array("decCosts", $sortType, true)) {
       uasort($masterArray, "sortDecCosts");
-    } else if ($sortType == "incCosts") {
+    } else if (in_array("incCosts", $sortType, true)) {
       uasort($masterArray, "sortIncCosts");
     }
   }
@@ -220,7 +331,12 @@
       }
       echo " Ticket #" . $value . " - " . (count($masterArray[$value]) - 1). " child issues.</span>";
       echo "<div class='masterTicketInfo' id=m" . $number . ">";
-      echo "<b>Status: </b>" . $masterData[$value]["status"] . "<br>";
+      echo "<b>Status: </b>" . "<td valign='top'><select class=\"cell editable\" name=\"status[]\" value=\"" . $masterData[$value]["status"]  . "\" data-column=\"status\" data-edited=\"false\" data-master=\"" . $value . "\" data-ticket=\"" . $value . "\"><option value='Open'";
+      if ($masterData[$value]["status"] == "Open") {
+        echo " selected>Open</option><option value='Closed'>Closed</option></select></td><br>\n";
+      } else {
+        echo ">Open</option><option value='Closed' selected>Closed</option></select></td><br>\n";
+      }
       echo "<b>Description: </b>" . $masterData[$value]["description"] . "<br>";
       echo "<b>User ID: </b>" . $masterData[$value]["userid"] . "<br>";
       echo "<b>Email: </b>" . $masterData[$value]["email"] . "<br>";
@@ -232,7 +348,7 @@
       echo "<th>Prod Code</th>\n";
       echo "<th width='65'>Ticket #</th>\n";
       echo "<th>Reason</th>\n";
-      echo "<th><input type=\"text\" class=\"colHeader editable\" value=\"Close Date\" data-row=\"" . $rowNum . "\" data-column=\"closeDate\" data-original=\"Close Date\" data-master=\"" . $value . "\"></th>\n";
+      echo "<th><input type=\"text\" class=\"colHeader editable\" value=\"Close Date\" data-row=\"" . $rowNum . "\" data-column=\"closeDate\" data-original=\"Close Date\" data-master=\"" . $value . "\" data-toggle=\"tooltip\" title=\"YYYY-MM-DD\"></th>\n";
       echo "<th><input type=\"text\" class=\"colHeader editable\" value=\"PID\" data-row=\"" . $rowNum . "\" data-column=\"pid\" data-original=\"PID\" data-master=\"" . $value . "\"></th>\n";
       echo "<th><input type=\"text\" class=\"colHeader editable\" value=\"Buyer\" data-row=\"" . $rowNum . "\" data-column=\"buyer\" data-original=\"Buyer\" data-master=\"" . $value . "\"></th>\n";
       echo "<th><input type=\"text\" class=\"colHeader editable\" value=\"Index\" data-row=\"" . $rowNum . "\" data-column=\"index\" data-original=\"Index\" data-master=\"" . $value . "\"></th>\n";
@@ -257,7 +373,7 @@
       echo "<td></td>";
       echo "<td>" . $value . "</td>";
       echo "<td></td>";
-      echo "<td>" . $masterData[$value]["closeDate"] . "</td>";
+      echo "<td valign='top'><input type=\"text\" class=\"cell editable\" name=\"closeDate[]\" value=\"" . $masterData[$value]["closeDate"] . "\" data-row=\"" . $rowNum . "\" data-column=\"closeDate\" data-edited=\"false\" data-master=\"" . $value . "\" data-ticket=\"" . $value . "\" data-toggle=\"tooltip\" title=\"YYYY-MM-DD\"></td>\n";
       echo "<td><input type=\"text\" class=\"cell editable\" name=\"pid[]\" value=\"" . $masterData[$value]["pid"] . "\" data-row=\"" . $rowNum . "\" data-column=\"pid\" data-edited=\"false\" data-master=\"" . $value . "\" data-ticket=\"" . $value . "\" style=\"background-color: #ffff00; \">\n</td>";
       echo "<td>" . $masterData[$value]["lastName"] . ", " . $masterData[$value]["firstName"] . "</td>";
       echo "<td valign='top'>";
@@ -363,7 +479,7 @@
           }
         }
         echo "</td></ul>";
-        echo "<td valign='top'><input type=\"text\" class=\"cell editable\" name=\"closeDate[]\" value=\"" . $ticketData[$currentTicket]["closeDate"] . "\" data-row=\"" . $rowNum . "\" data-column=\"closeDate\" data-edited=\"false\" data-master=\"" . $value . "\" data-ticket=\"" . $currentTicket . "\"></td>\n";
+        echo "<td valign='top'><input type=\"text\" class=\"cell editable\" name=\"closeDate[]\" value=\"" . $ticketData[$currentTicket]["closeDate"] . "\" data-row=\"" . $rowNum . "\" data-column=\"closeDate\" data-edited=\"false\" data-master=\"" . $value . "\" data-ticket=\"" . $currentTicket . "\" data-toggle=\"tooltip\" title=\"YYYY-MM-DD\"></td>\n";
         echo "<td valign='top'><input type=\"text\" class=\"cell editable\" name=\"pid[]\" value=\"" . $ticketData[$currentTicket]["pid"] . "\" data-row=\"" . $rowNum . "\" data-column=\"pid\" data-edited=\"false\" data-master=\"" . $value . "\" data-ticket=\"" . $currentTicket . "\"></td>\n";
         echo "<td valign='top'><input type=\"text\" class=\"cell editable\" name=\"buyer[]\" value=\"" . $ticketData[$currentTicket]["buyer"] . "\" data-row=\"" . $rowNum . "\" data-column=\"buyer\" data-edited=\"false\" data-master=\"" . $value . "\" data-ticket=\"" . $currentTicket . "\"></td>\n";
         echo "<td valign='top'>";
@@ -428,7 +544,12 @@
           echo "<br>";
         }
         echo "</td>";
-        echo "<td valign='top'><select class=\"cell editable\" name=\"billable[]\" value=\"" . $ticketData[$currentTicket]["billable"] . "\" data-row=\"" . $rowNum . "\" data-column=\"billable\" data-edited=\"false\" data-master=\"" . $value . "\" data-ticket=\"" . $currentTicket . "\"><option value='Yes'>Yes</option><option value='No'>No</option></select></td>\n";
+        echo "<td valign='top'><select class=\"cell editable\" name=\"billable[]\" value=\"" . $ticketData[$currentTicket]["billable"] . "\" data-row=\"" . $rowNum . "\" data-column=\"billable\" data-edited=\"false\" data-master=\"" . $value . "\" data-ticket=\"" . $currentTicket . "\"><option value='Yes'";
+        if ($ticketData[$currentTicket]["billable"] == "Yes") {
+          echo " selected>Yes</option><option value='No'>No</option></select></td>\n";
+        } else {
+          echo ">Yes</option><option value='No' selected>No</option></select></td>\n";
+        }
         echo "</tr>\n";
       }
       echo "</table>\n";
@@ -509,19 +630,6 @@
 <script src="../dist/js/sb-admin-2.js"></script>
 <script src="../js/bounce.js"></script>
 <script src="../js/financial.js"></script>
-<!-- Table To JSON jQuery -->
-<script src="../js/jquery.tabletojson.min.js"></script>
-<script src="../js/d3.min.js"></script>
-<script src="../js/c3.min.js"></script>
-<!--<script src="../dist/js/revenue-time.js"></script>-->
-<!-- Page-Level Demo Scripts - Tables - Use for reference -->
-<script>
-$(document).ready(function() {
-  $('#dataTables-example').DataTable({
-    responsive: true
-  });
-});
-</script>
 
 </body>
 

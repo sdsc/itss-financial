@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			#loading_spinner {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<img id="loading_spinner" src="ajax-loader.gif">
+		<div class="my_update_panel"></div>
+		<script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+		<script>
+			$('#loading_spinner').show();
+
+			$.ajax({
+				url: 'differences.php',
+
+				//dataType: 'json',
+				success: function(data) {
+					console.log(data);
+					//$('.my_update_panel').html(data);
+					$('#loading_spinner').hide();
+				},
+				error: function(xhr, status, error) {
+					var err = eval("(" + xhr.responseText + ")");
+  					alert(err.Message);
+				}
+			});
+		</script>
+	</body>
+</html>

@@ -3,6 +3,7 @@
 	require 'config.php';
 	$projfield = array();
 	$abfield = array();
+	$changedStatus;
 
 	// $_POST is receiving a JSON string when the user clicks "Apply Changes." The JSON includes all
 	// edited tickets with their edited field values.
@@ -10,6 +11,8 @@
 		foreach($infoArray as $property=>$value) {
 			if (isAbField($property)) {
 				$abfield[$property] = $value;
+			} else if ($property == "status") {
+				$changedStatus = $value;
 			} else {
 				$projfield[$property] = $value;
 			}
@@ -26,25 +29,63 @@
 			);
 			
 			if (count($projfield) == 0 && count($abfield) == 0) {
-				echo "No changes were made.";
+				if ($changedStatus == "Open" || $changedStatus == "Closed") {
+					$issue_number = $client->MRWebServices__editIssue($username, $footprintPW,'',
+					array(
+						"projectID" =>3,
+						"mrID" => $ticket,
+	    				"status" => $changedStatus
+	            	)
+					);
+					$changedStatus = "";
+					echo "Issue successfully changed.";
+				} else {
+					echo "No changes were made.";
+				}
 			} else if (count($projfield) == 0) {
-				$issue_number = $client->MRWebServices__editIssue($username, $footprintPW,'',
-				array(
-					"projectID" =>3,
-					"mrID" => $ticket,
-    				"abfields" => $abfield
-            	)
-				);
-				echo "Issue changed";
+				if ($changedStatus == "Open" || $changedStatus == "Closed") {
+					$issue_number = $client->MRWebServices__editIssue($username, $footprintPW,'',
+					array(
+						"projectID" =>3,
+						"mrID" => $ticket,
+	    				"status" => $changedStatus,
+	    				"abfields" => $abfield
+	            	)
+					);
+					$changedStatus = "";
+					echo "Issue successfully changed.";
+				} else {
+					$issue_number = $client->MRWebServices__editIssue($username, $footprintPW,'',
+						array(
+						"projectID" =>3,
+						"mrID" => $ticket,
+	    				"abfields" => $abfield
+	            	)
+					);
+				}
+				echo "Issue successfully changed.";
 			} else if (count($abfield) == 0) {
-				$issue_number = $client->MRWebServices__editIssue($username, $footprintPW,'',
-				array(
-					"projectID" =>3,
-					"mrID" => $ticket,
-    				"projfields" => $projfield
-            	)
-				);
-				echo "Issue changed";
+				if ($changedStatus == "Open" || $changedStatus == "Closed") {
+					$issue_number = $client->MRWebServices__editIssue($username, $footprintPW,'',
+					array(
+						"projectID" =>3,
+						"mrID" => $ticket,
+	    				"status" => $changedStatus,
+	    				"projfields" => $projfield
+	            	)
+					);
+					$changedStatus = "";
+					echo "Issue successfully changed.";
+				} else {
+					$issue_number = $client->MRWebServices__editIssue($username, $footprintPW,'',
+					array(
+						"projectID" =>3,
+						"mrID" => $ticket,
+    					"projfields" => $projfield
+            		)
+					);
+				}
+				echo "Issue successfully changed.";
 			} else {
 				$issue_number = $client->MRWebServices__editIssue($username, $footprintPW,'',
 				array(
@@ -54,7 +95,7 @@
     				"abfields" => $abfield
             	)
 				);
-				echo "Issue changed";
+				echo "Issue successfully changed.";
 			}
  
  		} catch (SoapFault $exception) {
@@ -69,3 +110,5 @@
 		return false;
 	}
 ?>
+
+
